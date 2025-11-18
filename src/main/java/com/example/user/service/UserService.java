@@ -5,12 +5,15 @@ import com.example.scheduleruser.repository.SchedulerRepository;
 import com.example.user.dto.*;
 import com.example.user.entity.User;
 import com.example.user.repository.UserRepository;
-import jakarta.persistence.Table;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +22,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final SchedulerRepository schedulerRepository;
 
+    // 유저 생성
     @Transactional
     public CreateUserResponse save(Long schedulerId, CreateUserRequest request) {
         Scheduler scheduler = schedulerRepository.findById(schedulerId).orElseThrow(
@@ -34,6 +38,7 @@ public class UserService {
     }
 
 
+    // 유저 검색
     @Transactional(readOnly = true)
     public List<GetUserResponse> getAll(Long schedulerId) {
         Scheduler scheduler = schedulerRepository.findById(schedulerId).orElseThrow(
@@ -82,5 +87,18 @@ public class UserService {
             throw new IllegalStateException("없는 유저입니다.");
         }
         userRepository.deleteById(userId);
+    }
+
+    @Transactional
+    public User login(String email, Long password) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+
+        User user = optionalUser.orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 일치하지 않습니다."));
+
+        if (password == null || !password.equals(user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 일치하지 않습니다.");
+        }
+        return user;
     }
 }

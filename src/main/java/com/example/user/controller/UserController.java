@@ -1,10 +1,11 @@
 package com.example.user.controller;
 
-import com.example.scheduleruser.dto.GetschedulerResponse;
+import com.example.sign.dto.LoginRequest;
+import com.example.sign.dto.LoginResponse;
 import com.example.user.dto.*;
-import com.example.user.repository.UserRepository;
+import com.example.user.entity.User;
 import com.example.user.service.UserService;
-import lombok.NoArgsConstructor;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ public class UserController {
 
     private final UserService userService;
 
+    // 유저 생성
     @PostMapping("/schedulers/{schedulerId}/users")
     public ResponseEntity<CreateUserResponse> createUser(
             @PathVariable Long schedulerId,
@@ -26,6 +28,20 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(schedulerId, request));
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(
+            @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        User loginUser = userService.login(request.getEmail(), request.getPassword());
+        httpRequest.getSession().setAttribute("loginUser", loginUser);
+        LoginResponse response = new LoginResponse(
+                loginUser.getId(), loginUser.getName(), loginUser.getEmail()
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    // 유저 검색
     @GetMapping("/schedulers/{schedulerId}/users")
     public ResponseEntity<List<GetUserResponse>>  getUsers(
             @PathVariable Long schedulerId
