@@ -24,7 +24,7 @@ public class UserService {
         Scheduler scheduler = schedulerRepository.findById(schedulerId).orElseThrow(
                 () -> new IllegalStateException("없는 일정입니다.")
         );
-        User user = new User(request.getName(),request.getEmail(), scheduler);
+        User user = new User(request.getName(),request.getEmail(),request.getPassword(), scheduler);
         User saveUser = userRepository.save(user);
         return new CreateUserResponse(
                 saveUser.getId(),

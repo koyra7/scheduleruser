@@ -18,6 +18,7 @@ public class User {
     private Long id;
     private String name;
     private String email;
+    private Long password;
     private LocalDate createdate;
     private LocalDate insertdate;
 
@@ -26,9 +27,10 @@ public class User {
     @JoinColumn(name = "scheduler id", nullable = false)
     private Scheduler scheduler;
 
-    public User(String name, String email, Scheduler scheduler) {
+    public User(String name, String email,Long password, Scheduler scheduler) {
         this.name = name;
         this.email = email;
+        this.password = password;
         this.scheduler = scheduler;
         this.createdate = LocalDate.now();
         this.insertdate = LocalDate.now();
