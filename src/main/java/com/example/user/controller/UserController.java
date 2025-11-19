@@ -1,11 +1,13 @@
 package com.example.user.controller;
 
+import com.example.config.PasswordEncoder;
 import com.example.sign.dto.LoginRequest;
 import com.example.sign.dto.LoginResponse;
 import com.example.user.dto.*;
 import com.example.user.entity.User;
 import com.example.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +20,14 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
+
 
     // 유저 생성
     @PostMapping("/schedulers/{schedulerId}/users")
     public ResponseEntity<CreateUserResponse> createUser(
             @PathVariable Long schedulerId,
+            @Valid
             @RequestBody CreateUserRequest request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(schedulerId, request));
@@ -33,7 +38,7 @@ public class UserController {
             @RequestBody LoginRequest request,
             HttpServletRequest httpRequest
     ) {
-        User loginUser = userService.login(request.getEmail(), request.getPassword());
+        User loginUser = userService.login(request.getEmail(), request.getPassword().toString());
         httpRequest.getSession().setAttribute("loginUser", loginUser);
         LoginResponse response = new LoginResponse(
                 loginUser.getId(), loginUser.getName(), loginUser.getEmail()

@@ -6,6 +6,7 @@ import com.example.scheduleruser.dto.GetschedulerResponse;
 import com.example.scheduleruser.dto.UpdateSchedulerRequest;
 import com.example.scheduleruser.repository.SchedulerRepository;
 import com.example.scheduleruser.service.SchedulerService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ public class SchedulerController {
     // 생성
     @PostMapping("/schedulers")
     public ResponseEntity<CreateSchedulerResponse> createScheduler(
+            @Valid
             @RequestBody CreateSchedulerRequest request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(schedulerService.save(request));

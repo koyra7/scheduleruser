@@ -16,8 +16,13 @@ public class Scheduler {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(length = 4)
     private String name;
+
+    @Column(length = 10)
     private String title;
+
     private String content;
     private LocalDate createDate;
     private LocalDate insertDate;

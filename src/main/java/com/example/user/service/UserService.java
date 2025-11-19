@@ -1,5 +1,6 @@
 package com.example.user.service;
 
+import com.example.config.PasswordEncoder;
 import com.example.scheduleruser.entity.Scheduler;
 import com.example.scheduleruser.repository.SchedulerRepository;
 import com.example.user.dto.*;
@@ -21,6 +22,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final SchedulerRepository schedulerRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // 유저 생성
     @Transactional
@@ -28,7 +30,15 @@ public class UserService {
         Scheduler scheduler = schedulerRepository.findById(schedulerId).orElseThrow(
                 () -> new IllegalStateException("없는 일정입니다.")
         );
-        User user = new User(request.getName(),request.getEmail(),request.getPassword(), scheduler);
+        // 암호화
+        String encodedPw = passwordEncoder.encode(request.getPassword().toString());
+        User user = new User(
+                request.getName(),
+                request.getEmail(),
+                // 암호화로 리턴
+                encodedPw,
+                scheduler
+        );
         User saveUser = userRepository.save(user);
         return new CreateUserResponse(
                 saveUser.getId(),
@@ -90,14 +100,14 @@ public class UserService {
     }
 
     @Transactional
-    public User login(String email, Long password) {
+    public User login(String email, String password) {
         Optional<User> optionalUser = userRepository.findByEmail(email);
 
-        User user = optionalUser.orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 일치하지 않습니다."));
+        User user = optionalUser.orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일이 틀렸습니다."));
 
-        if (password == null || !password.equals(user.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 일치하지 않습니다.");
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, " 비밀번호가 일치하지 않습니다.");
         }
         return user;
     }
